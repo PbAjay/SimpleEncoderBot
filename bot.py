@@ -8,7 +8,7 @@ from ffmpeg.installer import ensure_ffmpeg
 from telegram.start import register_start
 from telegram.uploads import register_uploads
 from telegram.callbacks import register_callbacks
-from queue.scheduler import start_worker
+from jobqueue.scheduler import start_worker
 from database.jobs import resume_jobs
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
