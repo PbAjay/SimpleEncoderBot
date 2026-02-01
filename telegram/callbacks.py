@@ -7,7 +7,7 @@ from ffmpeg.command import build_ffmpeg_command
 from ffmpeg.runner import run_ffmpeg
 from ffmpeg.probe import get_duration
 from database.jobs import create_job, save_job, update_status
-from queue.scheduler import enqueue
+from jobqueue.scheduler import enqueue
 from config import DOWNLOAD_DIR, ENCODE_DIR
 from telegram.uploads import USER_STATES
 
