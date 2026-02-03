@@ -1,6 +1,7 @@
 import time
 from jobqueue.scheduler import enqueue
 from database.mongo import jobs
+from telegram.processor import process_job   # ✅ SAFE IMPORT
 
 def create_job(chat_id, file_id, settings):
     return {
@@ -22,10 +23,6 @@ async def update_status(job_id, status):
     )
 
 async def resume_jobs(app):
-    # ✅ CORRECT IMPORT
-    from jobqueue.scheduler import enqueue
-    from telegram.callbacks import process_job
-
     async for job in jobs.find({"status": {"$ne": "done"}}):
         async def task(j=job):
             await process_job(app, j, j["settings"])
