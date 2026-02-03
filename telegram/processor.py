@@ -12,9 +12,11 @@ async def process_job(app, job, state):
     input_path = os.path.join(DOWNLOAD_DIR, f"{job['_id']}.input")
     output_path = os.path.join(ENCODE_DIR, f"{job['_id']}.mkv")
 
+    # DOWNLOAD
     await update_status(job["_id"], "downloading")
     await download_file(state.source_message, input_path, status)
 
+    # ENCODE
     duration = get_duration(input_path)
     await update_status(job["_id"], "encoding")
 
@@ -30,6 +32,7 @@ async def process_job(app, job, state):
     cmd = build_ffmpeg_command(input_path, output_path, state)
     await run_ffmpeg(cmd, duration, progress)
 
+    # FINISH
     await update_status(job["_id"], "done")
 
     if state.upload_mode == "media":
