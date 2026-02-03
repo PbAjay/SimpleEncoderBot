@@ -22,7 +22,8 @@ async def update_status(job_id, status):
     )
 
 async def resume_jobs(app):
-    from queue.scheduler import enqueue
+    # ✅ CORRECT IMPORT
+    from jobqueue.scheduler import enqueue
     from telegram.callbacks import process_job
 
     async for job in jobs.find({"status": {"$ne": "done"}}):
