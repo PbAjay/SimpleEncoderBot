@@ -13,6 +13,7 @@ from telegram.processor import process_job
 
 from jobqueue.scheduler import start_worker, enqueue
 from database.jobs import resume_jobs
+from utils.keepalive import start_keepalive
 
 # ensure folders exist
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -28,12 +29,12 @@ app = Client(
 async def main():
     log("Boot sequence started")
 
-    # check ffmpeg
+    # 🔥 START FAKE HTTP SERVER FOR RENDER FREE TIER
+    await start_keepalive()
+
     await ensure_ffmpeg()
-
-    # start telegram client
     await app.start()
-
+    
     # register telegram handlers
     register_start(app)
     register_uploads(app)
