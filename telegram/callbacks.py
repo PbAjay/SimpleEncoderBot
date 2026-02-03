@@ -1,15 +1,10 @@
-import os
 from pyrogram import filters
 from utils.auth import is_authorized
 from core.validator import validate_state
-from download.downloader import download_file
-from ffmpeg.command import build_ffmpeg_command
-from ffmpeg.runner import run_ffmpeg
-from ffmpeg.probe import get_duration
-from database.jobs import create_job, save_job, update_status
+from database.jobs import create_job, save_job
 from jobqueue.scheduler import enqueue
-from config import DOWNLOAD_DIR, ENCODE_DIR
 from telegram.uploads import USER_STATES
+from telegram.processor import process_job   # ✅ NEW IMPORT
 
 def register_callbacks(app):
 
@@ -66,38 +61,3 @@ async def create_and_enqueue_job(app, message, state):
         await process_job(app, job, state)
 
     await enqueue(task)
-
-async def process_job(app, job, state):
-    status = await app.send_message(job["chat_id"], "⬇️ Downloading...")
-
-    input_path = os.path.join(DOWNLOAD_DIR, f"{job['_id']}.input")
-    output_path = os.path.join(ENCODE_DIR, f"{job['_id']}.mkv")
-
-    await update_status(job["_id"], "downloading")
-
-    await download_file(state.source_message, input_path, status)
-
-    duration = get_duration(input_path)
-
-    await update_status(job["_id"], "encoding")
-
-    async def progress(percent, speed):
-        await status.edit_text(
-            f"🎞 Encoding\n\n"
-            f"{percent:.2f}%\n"
-            f"Speed: {speed}\n"
-            f"{state.resolution}p | {state.video_codec}\n"
-            f"{state.audio_codec} 192k"
-        )
-
-    cmd = build_ffmpeg_command(input_path, output_path, state)
-    await run_ffmpeg(cmd, duration, progress)
-
-    await update_status(job["_id"], "done")
-
-    if state.upload_mode == "media":
-        await app.send_video(job["chat_id"], output_path)
-    else:
-        await app.send_document(job["chat_id"], output_path)
-
-    await status.edit_text("✅ Encoding completed")
